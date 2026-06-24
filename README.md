@@ -62,4 +62,4 @@ git add README.md
  git push origin main
 ```
 
-> Si tu veux ajouter les autres fichiers du projet, remplace `git add README.md` par `git add .`.
+
