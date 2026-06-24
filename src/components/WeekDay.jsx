@@ -1,72 +1,57 @@
-import { useEffect, useState } from "react";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
-function getWeatherEmoji(temperature, precipitation, windSpeed) {
-  if (precipitation > 0) {
-    if (precipitation > 10) {
-      return "🌧️"; // Heavy rain
-    }
-    return "🌦️"; // Light rain
-  } else if (windSpeed > 20) {
-    return "🌬️"; // Windy
-  } else if (temperature > 30) {
-    return "☀️"; // Hot
-  } else if (temperature < 0) {
-    return "❄️"; // Snow
-  } else {
-    return "☁️"; // Cloudy
-  }
-}
+const WMO_FR = {
+  0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️",
+  45: "🌫️", 48: "🌫️",
+  51: "🌦️", 53: "🌦️", 55: "🌧️",
+  61: "🌦️", 63: "🌧️", 65: "🌧️",
+  71: "🌨️", 73: "❄️", 75: "❄️",
+  80: "🌦️", 81: "🌧️", 82: "⛈️",
+  95: "⛈️", 96: "⛈️", 99: "⛈️",
+};
 
-function getDayOfWeek(dateString) {
-  const date = new Date(dateString);
-  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  return daysOfWeek[date.getUTCDay()];
-}
+const JOURS_FR = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
 
-function WeekDay({ data, weatherUnits }) {
-    const [weatherEmoji, setWeatherEmoji] = useState("");
-    const [averageTemperature, setAverageTemperature] = useState(0);
+const getJour = (iso, index) => {
+  if (index === 0) return "Aujourd'hui";
+  if (index === 1) return "Demain";
+  const date = new Date(iso);
+  return `${JOURS_FR[date.getUTCDay()]} ${date.getUTCDate()}`;
+};
 
-    useEffect(() => {
-        if (!data) return;
+function WeekDay({ data, weatherUnits, index }) {
+  if (!data) return null;
 
-        const avTemp = ((data.temperature_2m_max + data.temperature_2m_min) / 2).toFixed(1);
-        const emoji = getWeatherEmoji(Number(avTemp), data.precipitation_sum, data.wind_speed_10m_max);
+  const icone = WMO_FR[data.code] || "🌡️";
+  const jour = getJour(data.jour, index);
 
-        setAverageTemperature(avTemp);
-        setWeatherEmoji(emoji);
-
-    }, [data]);
-
-    if (!data || !weatherUnits) {
-        return <div>Erreur</div>;
-    }
-
-    const dayOfWeek = getDayOfWeek(data.day);
-
-    return (
-        <div>
-            <p>{dayOfWeek}</p>
-            <p>{averageTemperature} <span>{weatherUnits.temperature}</span></p>
-            <div>
-                {weatherEmoji && <div>{weatherEmoji}</div>}
-            </div>
-        </div>
-    );
+  return (
+    <div className="card week-day">
+      <p className="week-jour">{jour}</p>
+      <div className="week-icone">{icone}</div>
+      <div className="week-temps">
+        <span className="temp-max">{Math.round(data.tempMax)}°</span>
+        <span className="temp-min">{Math.round(data.tempMin)}°</span>
+      </div>
+      <div className="week-details">
+        <span>💧 {data.precipitation.toFixed(1)}{weatherUnits.rain}</span>
+        <span>🌬️ {Math.round(data.vent)}{weatherUnits.wind}</span>
+      </div>
+    </div>
+  );
 }
 
 WeekDay.propTypes = {
-    data: PropTypes.shape({
-        day: PropTypes.string.isRequired,
-        temperature_2m_max: PropTypes.number.isRequired,
-        temperature_2m_min: PropTypes.number.isRequired,
-        precipitation_sum: PropTypes.number.isRequired,
-        wind_speed_10m_max: PropTypes.number.isRequired,
-    }).isRequired,
-    weatherUnits: PropTypes.shape({
-        temperature: PropTypes.string.isRequired,
-    }).isRequired,
+  data: PropTypes.shape({
+    jour: PropTypes.string.isRequired,
+    tempMax: PropTypes.number.isRequired,
+    tempMin: PropTypes.number.isRequired,
+    precipitation: PropTypes.number.isRequired,
+    vent: PropTypes.number.isRequired,
+    code: PropTypes.number.isRequired,
+  }).isRequired,
+  weatherUnits: PropTypes.object.isRequired,
+  index: PropTypes.number.isRequired,
 };
 
 export default WeekDay;
