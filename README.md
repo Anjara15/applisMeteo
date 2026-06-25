@@ -48,18 +48,9 @@ npm run dev
 ## Détails techniques
 
 - L’application utilise l’API Open-Meteo pour récupérer les données météo actuelles et les prévisions.
-- Les villes recherchées sont limitées à Madagascar (`countryCode=MG`).
+- Les villes recherchées sont limitées à Madagascar.
 - Le thème clair/sombre est conservé dans `localStorage`.
 - Les données météo sont automatiquement rafraîchies toutes les 10 minutes.
 
-## Déploiement sur GitHub
-
-Le dépôt est configuré pour se connecter à ton repository GitHub :
-
-```bash
-git add README.md
- git commit -m "docs: update README with detailed project overview"
- git push origin main
-```
 
 
